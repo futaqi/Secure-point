@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> Portal | secure point</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./firebase-messaging-sw.js').catch(function(err) { console.warn(err); });
+        });
+      }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ============================================== -->
+    <!-- 1. GERBANG OTORISASI (AEGIS LOCKDOWN)          -->
+    <!-- ============================================== -->
+    <div id="gerbangOtorisasi">
+        <div class="kotak-kunci">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <i class="fa-solid fa-microchip fa-fade" style="font-size:3.5rem; color:var(--neon-gold); text-shadow: 0 0 20px var(--neon-gold-glow);"></i>
+                <h2 class="font-tech font-bold" style="color:var(--text-main); margin:15px 0 5px 0; letter-spacing: 2px; font-size: 1.25rem;">SECURE PORTAL</h2>
+                <span class="font-tech" style="color:var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Masukkan Kunci Akses.</span>
+            </div>
+            <form id="authForm" style="display: flex; flex-direction: column;">
+                <div class="input-group">
+                    <i class="fa-solid fa-fingerprint input-icon"></i>
+                    <input type="text" id="accessKeyInput" class="input-cyber font-tech tracking-widest" placeholder="Kode VIP" autocomplete="off" required>
+                </div>
+                <button type="submit" id="btnSubmitAuth" class="btn-cyber font-tech" style="margin-top: 5px;"><i class="fa-solid fa-bolt"></i> OTORISASI</button>
+                <button type="button" id="btnGoogleLogin" class="btn-cyber font-tech" style="margin-top: 12px; background: rgba(234, 67, 53, 0.1); border-color: #ea4335; color: #ea4335;"><i class="fa-brands fa-google"></i> LOGIN DENGAN GOOGLE</button>
+                <button type="button" id="btnBiometricLogin" class="btn-cyber font-tech hidden" style="margin-top: 12px; background: rgba(16, 185, 129, 0.1); border-color: var(--success); color: var(--success);"><i class="fa-solid fa-fingerprint"></i> LOGIN FACE ID / TOUCH ID</button>
+            </form>
+            <p id="authMessage" class="font-tech text-center" style="font-size: 0.7rem; color:var(--danger); margin-top: 15px; min-height: 15px; opacity: 0; transition: opacity 0.3s;"></p>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 2. WADAH UTAMA KLIEN                           -->
+    <!-- ============================================== -->
+    <div id="dashboardArea">
+        
+        <!-- ============================================== -->
+        <!-- VIEW A: EXECUTIVE DASHBOARD (Pusat Komando)    -->
+        <!-- ============================================== -->
+        <div id="viewDashboard" class="flex-1 flex flex-col w-full h-full overflow-y-auto overscroll-contain p-4 sm:p-6 pb-28 relative">
+            
+            <div class="flex justify-between items-center mb-6 shrink-0">
+                <div class="font-tech text-[var(--neon-gold)] tracking-widest text-xs font-bold uppercase"><i class="fa-solid fa-shield-halved mr-1"></i> DASHBOARD</div>
+                <div id="notifIndicatorDashboard" class="w-3 h-3 rounded-full bg-[var(--danger)] animate-pulse shadow-[0_0_8px_var(--danger)]" title="Status Notifikasi"></div>
+            </div>
+
+            <!-- ZONA 1: ADMIN IDENTITY (Imunitas Text Putih Mutlak) -->
+            <div class="hologram-card p-5 mb-6 rounded-2xl relative overflow-hidden flex flex-col gap-4 shrink-0">
+                <div class="absolute -top-10 -right-10 opacity-5 text-9xl text-[var(--neon-gold)] pointer-events-none"><i class="fa-solid fa-globe"></i></div>
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="relative w-16 h-16 shrink-0">
+                        <img id="adminPhotoDash" src="" class="w-full h-full rounded-full border-2 border-[var(--neon-gold)] object-cover shadow-[0_0_15px_var(--neon-gold-glow)] hidden">
+                        <div id="adminInitialsDash" class="w-full h-full rounded-full bg-[#030712] border-2 border-[var(--border-cyber)] flex items-center justify-center !text-[var(--neon-gold)] text-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]"><i class="fa-solid fa-user-tie"></i></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 id="adminNameDash" class="font-tech text-xl font-bold !text-[#f8fafc] truncate tracking-wide uppercase drop-shadow-md">MEMUAT...</h2>
+                        <p id="adminTaglineDash" class="font-tech text-xs !text-[#94a3b8] truncate mb-2"></p>
+                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[rgba(0,0,0,0.4)] border border-[var(--border-cyber)]">
+                            <span id="statusPingDash" class="w-2 h-2 rounded-full bg-[var(--danger)]"></span>
+                            <span id="adminStatusTextDash" class="font-tech text-[0.65rem] font-bold !text-[#cbd5e1] tracking-wider">OFFLINE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ZONA 2: THE EXECUTIVE MATRIX -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-6 shrink-0">
+                <button id="btnOpenChat" class="matrix-btn group">
+                    <div class="matrix-icon text-[var(--success)] group-hover:bg-[var(--success)] group-hover:text-[var(--bg-base)]"><i class="fa-solid fa-shield-halved"></i></div>
+                    <span class="matrix-title">PESAN</span>
+                    <span class="matrix-desc">Jalur komunikasi Dengan Admin </span>
+                </button>
+                <a id="btnMaps" href="#" target="_blank" class="matrix-btn group opacity-50 pointer-events-none">
+                    <div class="matrix-icon text-[#3b82f6] group-hover:bg-[#3b82f6] group-hover:text-[#fff]"><i class="fa-solid fa-location-crosshairs"></i></div>
+                    <span class="matrix-title">LIVE LOKASI</span>
+                    <span class="matrix-desc">📍</span>
+                </a>
+                <button id="btnOpenPortofolio" class="matrix-btn group">
+                    <div class="matrix-icon text-[var(--neon-gold)] group-hover:bg-[var(--neon-gold)] group-hover:text-[var(--bg-base)]"><i class="fa-solid fa-briefcase"></i></div>
+                    <span class="matrix-title">🚫</span>
+                    <span class="matrix-desc">Showcase & Project</span>
+                </button>
+                <button id="btnOpenReviewMatrix" class="matrix-btn group">
+                    <div class="matrix-icon text-[#eab308] group-hover:bg-[#eab308] group-hover:text-[#fff]"><i class="fa-solid fa-star-half-stroke"></i></div>
+                    <span class="matrix-title">RATING</span>
+                    <span class="matrix-desc">Berikan ulasan Anda</span>
+                </button>
+            </div>
+            
+            <button id="btnActivateNotif" class="w-full py-3 mb-6 rounded-xl border border-[var(--border-cyber)] bg-[var(--bg-panel-solid)] text-[var(--text-main)] font-tech text-xs font-bold tracking-widest flex items-center justify-center gap-2 hover:border-[var(--neon-gold)] transition-colors shadow-sm shrink-0">
+                 <i class="fa-solid fa-bell text-[var(--neon-gold)]"></i> AKTIFKAN ALARM
+            </button>
+
+            <!-- ZONA 3: HUD DIAGNOSTIC TELEMETRY (Imunitas Text Putih Mutlak) -->
+            <div class="mt-auto pt-2 w-full shrink-0">
+                <div class="hologram-card p-3 sm:p-4 rounded-xl relative overflow-hidden border border-[var(--border-cyber)]">
+                    <div class="flex justify-between items-center mb-3 border-b border-[var(--border-cyber)] pb-2">
+                        <span class="font-tech text-[0.55rem] sm:text-[0.6rem] !text-[#cbd5e1] tracking-widest uppercase"><i class="fa-solid fa-microchip mr-1"></i>Diagnostics</span>
+                        <span class="font-tech text-[0.5rem] !text-[#10b981] tracking-widest animate-pulse border border-[var(--success)] px-1.5 rounded bg-[rgba(16,185,129,0.1)]">LINK SECURE</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mb-2">
+                        <div class="flex flex-col items-center justify-center p-2 rounded bg-[rgba(0,0,0,0.4)] border border-[var(--border-cyber)]">
+                            <div class="radio-wave-container mb-1" id="waveContainer"><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div></div>
+                            <span id="telemetryNet" class="font-tech text-[0.6rem] !text-[#f8fafc] font-bold text-center leading-tight">--</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-2 rounded bg-[rgba(0,0,0,0.4)] border border-[var(--border-cyber)]">
+                            <div class="vu-meter mb-1.5" id="vuMeterPing"><div class="vu-segment"></div><div class="vu-segment"></div><div class="vu-segment"></div><div class="vu-segment"></div></div>
+                            <span id="telemetryPing" class="font-tech text-[0.6rem] !text-[#10b981] font-bold">-- ms</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center p-2 rounded bg-[rgba(0,0,0,0.4)] border border-[var(--border-cyber)]">
+                            <i class="fa-solid fa-memory text-[#3b82f6] text-[0.7rem] mb-1"></i>
+                            <span id="telemetryRam" class="font-tech text-[0.6rem] !text-[#3b82f6] font-bold text-center leading-tight">-- RAM</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="flex items-center justify-center gap-2 p-2 rounded bg-[rgba(0,0,0,0.4)] border border-[var(--border-cyber)]">
+                            <i class="fa-solid fa-battery-half text-[var(--success)] text-[0.7rem]" id="iconBat"></i>
+                            <span id="telemetryBat" class="font-tech text-[0.6rem] !text-[#f8fafc] font-bold">-- %</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-2 p-2 rounded bg-[rgba(0,0,0,0.4)] border border-[var(--border-cyber)]">
+                            <i class="fa-solid fa-fingerprint text-[var(--neon-gold)] text-[0.7rem]"></i>
+                            <span id="telemetryDev" class="font-tech text-[0.6rem] !text-[#c5a880] font-bold truncate">DEV-ID</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW B: SMART CHAT INTERFACE                   -->
+        <!-- ============================================== -->
+        <div id="viewChat" class="hidden flex-col w-full h-full absolute inset-0 bg-[var(--bg-base)] z-30 transform transition-transform duration-300 translate-x-full">
+            <header class="flex-shrink-0 bg-[var(--bg-panel-solid)] border-b border-[var(--border-cyber)] p-3 flex items-center gap-3 shadow-md z-40">
+                <button id="btnCloseChat" class="w-10 h-10 rounded-full flex items-center justify-center text-[var(--text-main)] hover:bg-[var(--bg-card)] transition-colors"><i class="fa-solid fa-arrow-left"></i></button>
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <img id="adminPhotoChat" src="" class="w-10 h-10 rounded-full border border-[var(--neon-gold)] object-cover hidden">
+                    <div id="adminInitialsChat" class="w-10 h-10 rounded-full bg-[var(--bg-card)] border border-[var(--border-cyber)] flex items-center justify-center text-[var(--neon-gold)]"><i class="fa-solid fa-user-tie"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <h2 id="adminNameChat" class="font-tech font-bold text-[0.85rem] text-[var(--text-main)] truncate uppercase">MEMUAT...</h2>
+                        <p class="font-tech text-[0.55rem] text-[var(--success)] tracking-widest">E2EE SECURED</p>
+                    </div>
+                </div>
+            </header>
+
+            <div id="chatStream" class="chat-scroll overflow-y-auto flex-1 relative z-10 overscroll-contain" style="display: flex; flex-direction: column; gap: 16px;"></div>
+
+            <!-- Footer Smart Chat (Input Diperlebar & Dipadatkan) -->
+            <div class="chat-footer z-40 relative px-3 py-2 bg-[var(--bg-panel-solid)] border-t border-[var(--border-cyber)]">
+                <form id="chatForm" class="flex items-end gap-1.5 w-full bg-[var(--bg-card)] p-1 rounded-2xl border border-[var(--border-cyber)] shadow-inner relative">
+                    <button type="button" id="btnToggleDrawer" class="w-[38px] h-[38px] shrink-0 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--neon-gold)] transition-colors"><i class="fa-solid fa-plus text-lg transition-transform duration-300" id="drawerIcon"></i></button>
+                    <div class="flex-1 relative">
+                        <textarea id="chatInput" rows="1" placeholder="Ketik pesan..." class="w-full bg-transparent text-[var(--text-main)] text-[0.85rem] py-2.5 px-1 outline-none resize-none max-h-[120px] scrollbar-hide"></textarea>
+                    </div>
+                    <button type="submit" id="btnSendChat" class="w-[38px] h-[38px] shrink-0 rounded-full bg-[var(--neon-gold)] text-[var(--bg-base)] flex items-center justify-center shadow-[0_0_10px_var(--neon-gold-glow)] transition-transform hover:scale-95"><i class="fa-solid fa-paper-plane text-xs ml-[-2px]"></i></button>
+                </form>
+
+                <!-- Laci Cerdas -->
+                <div id="mediaDrawer" class="media-drawer absolute left-0 right-0 bottom-full mb-1 bg-[var(--bg-panel-solid)] border border-[var(--border-active)] rounded-t-2xl p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] z-50">
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+                    <input type="file" id="galleryInput" accept="image/*, video/*" class="hidden">
+                    <div class="grid grid-cols-4 gap-3">
+                        <label for="cameraInput" class="drawer-btn group"><div class="drawer-icon bg-[rgba(197,168,128,0.1)] text-[var(--neon-gold)] group-hover:bg-[var(--neon-gold)] group-hover:text-black"><i class="fa-solid fa-camera"></i></div><span>Kamera</span></label>
+                        <label for="galleryInput" class="drawer-btn group"><div class="drawer-icon bg-[rgba(16,185,129,0.1)] text-[var(--success)] group-hover:bg-[var(--success)] group-hover:text-white"><i class="fa-solid fa-images"></i></div><span>Galeri</span></label>
+                        <button type="button" id="btnRecordAudio" class="drawer-btn group"><div class="drawer-icon bg-[rgba(59,130,246,0.1)] text-[#3b82f6] group-hover:bg-[#3b82f6] group-hover:text-white"><i class="fa-solid fa-microphone" id="micIcon"></i></div><span>Suara</span></button>
+                        <button type="button" id="btnStaticLocation" class="drawer-btn group"><div class="drawer-icon bg-[rgba(239,68,68,0.1)] text-[var(--danger)] group-hover:bg-[var(--danger)] group-hover:text-white"><i class="fa-solid fa-map-pin"></i></div><span>Lokasi</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- ACTION STACK (SPEED DIAL)                      -->
+        <!-- ============================================== -->
+        <div class="fab-container" id="draggableFab">
+            <div class="fab-menu-vertical" id="dialMenu">
+                <button class="fab-menu-item btn-danger" id="btnLogout" title="Kunci Portal"><i class="fa-solid fa-power-off"></i></button>
+                <button class="fab-menu-item" id="btnThemeToggle" title="Ganti Mode Visual"><i class="fa-solid fa-moon" id="iconTheme"></i></button>
+                <button class="fab-menu-item" id="btnBindGoogle" title="Tautkan Akun Google"><i class="fa-brands fa-google text-[#ea4335]"></i></button>
+                <button class="fab-menu-item" id="btnRegisterBiometric" title="Daftarkan FaceID/TouchID"><i class="fa-solid fa-fingerprint text-[var(--success)]"></i></button>
+                <!-- Tombol Review telah dicabut dari sini sesuai instruksi -->
+            </div>
+            <button id="btnSpeedDial" class="fab-btn"><i class="fa-solid fa-layer-group"></i></button>
+        </div>
+    </div>
+
+    <!-- MODAL PORTOFOLIO & REVIEWS -->
+    <div id="portofolioModal" class="hidden fixed inset-0 z-[100] flex justify-center items-center bg-black/80 backdrop-blur-md transition-opacity">
+        <div class="hologram-modal p-5 w-[90%] max-w-md rounded-2xl border border-[var(--neon-gold)] max-h-[80vh] flex flex-col">
+             <div class="flex justify-between items-center mb-4 pb-3 border-b border-[var(--border-cyber)] shrink-0"><h3 class="font-tech text-[var(--neon-gold)] text-[0.9rem] font-bold tracking-widest"><i class="fa-solid fa-briefcase"></i> PORTOFOLIO & PROYEK (MENDATANG) </h3><button id="btnClosePortofolio" class="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+             <div id="promoSection" class="flex-1 overflow-y-auto chat-scroll pr-2"><div id="promoContainer" class="grid grid-cols-1 gap-3"></div></div>
+        </div>
+    </div>
+
+    <div id="reviewForm" class="hidden fixed inset-0 z-[100] flex justify-center items-center bg-black/70 backdrop-blur-md">
+        <div class="hologram-modal p-5 w-[90%] max-w-sm rounded-2xl border border-[var(--border-active)]">
+             <div class="flex justify-between items-center mb-4 pb-3 border-b border-[var(--border-cyber)]"><h3 class="font-tech text-[var(--neon-gold)] text-[0.9rem] font-bold tracking-widest"><i class="fa-solid fa-star-half-stroke"></i> RATING & REVIEWS</h3><button id="btnCloseReview" class="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+             <div class="flex justify-between items-center mb-4 bg-[var(--bg-card)] p-3 rounded-xl border border-[var(--border-cyber)]"><div class="text-3xl font-bold text-[var(--text-main)]" id="ratingAverage">5.0</div><div class="text-right"><div class="text-[var(--neon-gold)] text-sm tracking-widest" id="starVisual">★★★★★</div><div class="text-[0.65rem] text-[var(--text-muted)] font-tech mt-1" id="ratingCount">(0 ulasan)</div></div></div>
+             <div id="reviewsStream" class="max-h-40 overflow-y-auto mb-4 flex flex-col gap-2 chat-scroll"></div>
+             <form id="formReviewSubmit" class="flex flex-col gap-3">
+                 <input type="hidden" id="ratingValue" value="5">
+                 <div id="starRatingSelector" class="flex justify-center gap-3 text-2xl mb-2 cursor-pointer"><span data-star="1" class="text-[var(--neon-gold)]"><i class="fa-solid fa-star"></i></span><span data-star="2" class="text-[var(--neon-gold)]"><i class="fa-solid fa-star"></i></span><span data-star="3" class="text-[var(--neon-gold)]"><i class="fa-solid fa-star"></i></span><span data-star="4" class="text-[var(--neon-gold)]"><i class="fa-solid fa-star"></i></span><span data-star="5" class="text-[var(--neon-gold)]"><i class="fa-solid fa-star"></i></span></div>
+                 <div class="input-group mb-0"><i class="fa-solid fa-user-pen input-icon"></i><input type="text" id="reviewerName" class="input-cyber font-tech" placeholder="Nama Publik" required></div>
+                 <div class="input-group mb-0"><i class="fa-solid fa-comment-dots input-icon" style="top: 24px;"></i><textarea id="reviewComment" class="input-cyber font-tech" placeholder="Umpan Balik Anda..." rows="2" style="resize: none;" required></textarea></div>
+                 <button type="submit" class="btn-cyber font-tech w-full mt-2"><i class="fa-solid fa-paper-plane"></i> KIRIM ULASAN</button>
+             </form>
+        </div>
+    </div>
+
+    <!-- MODAL ALARM & LOKASI -->
+    <div id="alarmModal" class="hidden fixed inset-0 z-[200] flex justify-center items-center bg-black/80 backdrop-blur-md">
+        <div class="hologram-modal p-6 w-[85%] max-w-sm rounded-2xl text-center border border-[var(--danger)]" style="box-shadow: 0 0 40px rgba(239, 68, 68, 0.3);"><div class="inline-flex justify-center items-center w-20 h-20 rounded-full bg-[rgba(239,68,68,0.1)] border border-[var(--danger)] mb-4"><i class="fa-solid fa-triangle-exclamation text-[var(--danger)] text-4xl animate-pulse"></i></div><h2 class="font-tech text-[var(--text-main)] text-xl mb-2 font-bold tracking-widest">ALARM</h2><p class="text-[var(--text-muted)] text-[0.8rem] mb-6 font-tech leading-relaxed">Sistem mengonfirmasi telah tiba di tujuan</p><button id="btnAcknowledgeAlarm" class="btn-cyber font-tech w-full" style="background: var(--danger); border-color: var(--danger); color: #fff; box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);"><i class="fa-solid fa-shield-check"></i> KONFIRMASI</button></div>
+    </div>
+    <div id="locationWarningModal" class="hidden fixed inset-0 z-[300] flex justify-center items-center bg-black/80 backdrop-blur-md">
+        <div class="hologram-modal p-6 w-[85%] max-w-sm rounded-2xl text-center border border-[var(--neon-gold)]" style="box-shadow: 0 0 40px rgba(197, 168, 128, 0.2);"><div class="inline-flex justify-center items-center w-16 h-16 rounded-full bg-[rgba(197,168,128,0.1)] border border-[var(--neon-gold)] mb-4"><i class="fa-solid fa-location-crosshairs text-[var(--neon-gold)] text-3xl"></i></div><h2 class="font-tech text-[var(--text-main)] text-lg mb-2 font-bold tracking-wide">AKURASI RENDAH</h2><p class="text-[var(--text-muted)] text-[0.8rem] mb-6 font-tech leading-relaxed">Sistem mendeteksi Anda menggunakan <b style="color: var(--danger);">Lokasi Perkiraan</b>.<br><br>Mohon buka <b class="text-[var(--text-main)]">Pengaturan Situs</b> browser, <b>hapus cache & izin lokasi</b>, muat ulang halaman, dan pilih <b>"Tepat / Precise"</b>.</p><button id="btnDismissLocationWarning" class="btn-cyber font-tech w-full" style="background: rgba(197, 168, 128, 0.1); color: var(--neon-gold);">SAYA MENGERTI</button></div>
+    </div>
+    <div id="aegisLockdownModal" class="hidden fixed inset-0 z-[9999] flex-col justify-center items-center bg-black/95 backdrop-blur-xl transition-all duration-300">
+        <div class="absolute inset-0 bg-[rgba(239,68,68,0.15)] animate-pulse pointer-events-none"></div><i class="fa-solid fa-radiation fa-spin text-[5rem] text-[var(--danger)] drop-shadow-[0_0_30px_rgba(239,68,68,0.8)] mb-6"></i><h1 class="font-tech text-3xl text-[var(--danger)] font-bold tracking-[0.3em] mb-2 text-center drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">AKSES DIBLOKIR</h1><p id="lockdownMessage" class="font-tech text-[var(--text-main)] text-sm text-center px-10 leading-relaxed tracking-widest mt-4 border border-[var(--danger)] bg-[rgba(239,68,68,0.1)] p-4 rounded-lg shadow-[0_0_20px_rgba(239,68,68,0.3)]">PERANGKAT ILEGAL TERDETEKSI.</p><button onclick="window.location.reload()" class="mt-8 font-tech text-[0.7rem] text-[var(--text-muted)] border border-[var(--border-cyber)] px-6 py-2 rounded hover:text-white hover:border-white transition-colors tracking-widest">MUAT ULANG</button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 3. CUSTOM SYSTEM POP-UP (PENGGANTI ALERT BAWAAN) -->
+    <!-- ============================================== -->
+    <div id="systemModal" class="hidden fixed inset-0 z-[99999] flex justify-center items-center bg-black/80 backdrop-blur-sm transition-opacity opacity-0">
+        <div class="hologram-modal p-6 w-[85%] max-w-sm rounded-2xl border border-[var(--neon-gold)] text-center flex flex-col items-center shadow-[0_0_30px_rgba(197,168,128,0.2)]">
+            <div id="sysModalIcon" class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 border border-[var(--neon-gold)] text-[var(--neon-gold)] bg-[rgba(197,168,128,0.1)]">
+                <i class="fa-solid fa-info"></i>
+            </div>
+            <h3 id="sysModalTitle" class="font-tech font-bold text-lg text-[var(--text-main)] tracking-widest mb-2 uppercase">PEMBERITAHUAN</h3>
+            <p id="sysModalText" class="font-tech text-sm text-[var(--text-muted)] leading-relaxed mb-6">Pesan sistem...</p>
+            <button id="btnSysModalClose" class="btn-cyber font-tech w-full">MENGERTI</button>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 4. SECURE MEDIA LIGHTBOX (ANTI-DOWNLOAD)       -->
+    <!-- ============================================== -->
+    <div id="secureLightbox" class="hidden fixed inset-0 z-[99999] flex justify-center items-center bg-black/95 backdrop-blur-xl transition-opacity opacity-0 touch-none">
+        
+        <!-- Action Dropdown Cerdas (Tanpa Membocorkan URL) -->
+        <div class="absolute top-5 right-16 z-50">
+            <button id="btnLightboxMenu" class="w-10 h-10 rounded-full bg-[var(--bg-panel-solid)] border border-[var(--border-cyber)] text-[var(--text-main)] flex items-center justify-center hover:text-[var(--neon-gold)] transition-colors shadow-lg"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            <div id="lightboxDropdown" class="hidden absolute right-0 mt-2 w-48 bg-[var(--bg-panel-solid)] border border-[var(--border-cyber)] rounded-xl overflow-hidden shadow-[0_5px_20px_rgba(0,0,0,0.5)] transform origin-top-right transition-all">
+                <button id="btnLightboxZoom" class="w-full text-left px-4 py-3 text-xs font-tech text-[var(--text-main)] hover:bg-[var(--bg-card)] border-b border-[var(--border-cyber)] flex items-center gap-3"><i class="fa-solid fa-expand text-[var(--neon-gold)]"></i> Mode Penuh</button>
+                <div class="w-full text-left px-4 py-3 text-xs font-tech text-[var(--danger)] flex items-center gap-3 opacity-70 bg-[rgba(239,68,68,0.05)] cursor-not-allowed"><i class="fa-solid fa-lock"></i> Unduhan Dikunci</div>
+            </div>
+        </div>
+
+        <button id="btnCloseLightbox" class="absolute top-5 right-4 w-10 h-10 rounded-full bg-[var(--bg-panel-solid)] border border-[var(--border-cyber)] text-[var(--text-main)] flex items-center justify-center z-50 hover:text-[var(--danger)] transition-colors shadow-lg"><i class="fa-solid fa-xmark text-xl"></i></button>
+        
+        <div class="relative w-full max-w-[95%] h-[85vh] rounded-xl overflow-hidden flex justify-center items-center">
+            <!-- Lapisan Kaca Pelindung Mutlak -->
+            <div class="absolute inset-0 z-10 secure-shield" oncontextmenu="return false;"></div>
+            <!-- Canvas Gambar -->
+            <img id="lightboxImage" src="" class="max-w-full max-h-full object-contain pointer-events-none select-none transition-transform duration-300" alt="Secure Visual" oncontextmenu="return false;" draggable="false">
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
