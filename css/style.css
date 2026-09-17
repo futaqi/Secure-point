@@ -1,0 +1,361 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   VIP PORTAL - CORE STYLING (Executive Slate & Gold)
+   ========================================================================== */
+
+:root {
+    /* MATRIX TEMA GELAP (DEFAULT EXECUTIVE) */
+    --bg-base: #030712;
+    --bg-panel-solid: #0f172a;
+    --bg-card: rgba(0, 0, 0, 0.5);
+    
+    --border-cyber: rgba(197, 168, 128, 0.2);
+    --border-active: rgba(197, 168, 128, 0.5);
+    
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dark: #64748b;
+
+    --neon-gold: #c5a880;
+    --neon-gold-glow: rgba(197, 168, 128, 0.3);
+    
+    --danger: #ef4444;
+    --success: #10b981;
+
+    /* Warna Tombol Speed Dial (Hijau Matang Menyala - Tidak Silau) */
+    --speed-dial-bg: #059669; 
+    --speed-dial-border: #10b981; 
+}
+
+/* OVERRIDE TEMA TERANG */
+body.theme-light {
+    --bg-base: #f0f2f5;
+    --bg-panel-solid: #ffffff;
+    --bg-card: #f8fafc;
+    --border-cyber: rgba(197, 168, 128, 0.4);
+    --border-active: rgba(197, 168, 128, 0.8);
+    --text-main: #111827;
+    --text-muted: #4b5563;
+    --text-dark: #9ca3af;
+    --neon-gold-glow: rgba(197, 168, 128, 0.15);
+}
+
+/* ==========================================
+   BASE RESET & 100dvh LAYOUT
+   ========================================== */
+* { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+html, body {
+    height: 100dvh; 
+    margin: 0; padding: 0; overflow: hidden; 
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    font-family: 'Outfit', -apple-system, sans-serif;
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+.font-tech { font-family: 'Space Grotesk', monospace; }
+.hidden { display: none !important; }
+
+/* ==========================================
+   GERBANG OTORISASI & MODAL HOLOGRAFIK
+   ========================================== */
+#gerbangOtorisasi {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at center, var(--bg-panel-solid) 0%, var(--bg-base) 100%);
+    z-index: 999999; display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.7s ease, visibility 0.7s ease;
+}
+
+.kotak-kunci, .hologram-modal {
+    background: var(--bg-panel-solid);
+    border: 1px solid var(--border-cyber);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5), 0 0 25px var(--neon-gold-glow);
+    position: relative; overflow: hidden;
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+.kotak-kunci { padding: 40px; border-radius: 16px; max-width: 420px; width: 90%; }
+.kotak-kunci::before, .hologram-modal::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--neon-gold), transparent);
+}
+
+/* ==========================================
+   KOMPONEN INPUT (EXECUTIVE GLASS)
+   ========================================== */
+.input-group { position: relative; width: 100%; margin-bottom: 20px; }
+.input-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--neon-gold); font-size: 1.1rem; pointer-events: none; z-index: 2;
+}
+.input-cyber {
+    width: 100%; padding: 14px 16px 14px 45px; 
+    background: var(--bg-card); border: 1px solid var(--border-cyber);
+    border-radius: 8px; color: var(--text-main); font-size: 0.95rem; 
+    outline: none; transition: all 0.3s ease;
+}
+.input-cyber:focus {
+    border-color: var(--neon-gold);
+    box-shadow: 0 0 10px var(--neon-gold-glow); background: var(--bg-panel-solid);
+}
+
+.btn-cyber {
+    padding: 14px 20px; border: 1px solid var(--neon-gold); background: rgba(197, 168, 128, 0.1);
+    color: var(--neon-gold); border-radius: 8px; font-weight: 700; cursor: pointer;
+    transition: all 0.2s ease; width: 100%; text-transform: uppercase;
+    font-size: 0.85rem; letter-spacing: 1px; display: inline-flex; align-items: center;
+    justify-content: center; gap: 8px; user-select: none;
+}
+.btn-cyber:hover { background: rgba(197, 168, 128, 0.2); box-shadow: 0 0 15px var(--neon-gold-glow); }
+.btn-cyber:active { transform: scale(0.97); }
+
+/* ==========================================
+   RUANG CHAT & FOOTER
+   ========================================== */
+#dashboardArea {
+    display: none; flex-direction: column; height: 100dvh; width: 100%;
+    max-width: 800px; margin: 0 auto; background: var(--bg-base);
+    position: relative; opacity: 0; transition: opacity 0.7s ease, background-color 0.4s ease;
+}
+
+.chat-scroll {
+    flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth;
+    padding: 20px; padding-bottom: 40px;
+}
+.chat-scroll::-webkit-scrollbar { width: 5px; }
+.chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 4px; }
+.chat-scroll::-webkit-scrollbar-thumb:hover { background: var(--neon-gold); }
+
+.bubble-self {
+    background: var(--bg-panel-solid); border: 1px solid var(--neon-gold);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15), inset 0 0 8px var(--neon-gold-glow);
+    border-top-right-radius: 4px; color: var(--text-main);
+}
+.bubble-other {
+    background: var(--bg-card); border: 1px solid var(--border-cyber);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-top-left-radius: 4px; color: var(--text-main);
+}
+
+.chat-footer {
+    flex-shrink: 0; background: var(--bg-panel-solid);
+    border-top: 1px solid var(--border-cyber); padding: 12px 16px;
+    position: relative; z-index: 30; transition: background 0.4s ease;
+}
+
+.popup-panel {
+    background: var(--bg-panel-solid); border: 1px solid var(--border-active);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 15px var(--neon-gold-glow);
+}
+
+/* ==========================================
+   ENTERPRISE ACTION STACK (SPEED DIAL VERTIKAL)
+   Struktur absolut yang tetap bisa di-drag JS
+   ========================================== */
+.fab-container {
+    position: absolute; bottom: 85px; right: 20px; z-index: 60;
+    width: 60px; height: 60px; /* Ukuran rigid untuk presisi drag (Hitbox) */
+}
+
+.fab-btn {
+    width: 100%; height: 100%; border-radius: 50%;
+    background: var(--speed-dial-bg); 
+    border: 1px solid var(--speed-dial-border);
+    color: #ffffff; display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 2px 3px rgba(255,255,255,0.3), inset 0 -3px 6px rgba(0,0,0,0.3);
+    position: relative; z-index: 65;
+}
+.fab-btn:active { 
+    transform: scale(0.92); 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 3px 6px rgba(0,0,0,0.4); 
+}
+
+/* Wadah Menu Stack Vertikal */
+.fab-menu-vertical {
+    position: absolute;
+    bottom: 75px; /* Jarak aman di atas tombol utama */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column-reverse; /* Item pertama muncul paling bawah (dekat jempol) */
+    gap: 12px;
+    align-items: center;
+    pointer-events: none;
+    z-index: 60;
+}
+
+.fab-menu-item {
+    position: relative; width: 44px; height: 44px; border-radius: 50%; 
+    background: var(--bg-panel-solid); border: 1px solid var(--border-active);
+    color: var(--text-main); display: flex; align-items: center; justify-content: center; 
+    font-size: 1.1rem; opacity: 0;
+    transform: translateY(20px) scale(0.8); /* Posisi awal tersembunyi ke bawah */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.fab-menu-vertical.active .fab-menu-item {
+    opacity: 1; pointer-events: auto;
+    transform: translateY(0) scale(1); /* Tampil Mekar Vertikal Presisi */
+}
+
+/* Stagger Animasi Vertikal yang Elegan */
+.fab-menu-vertical.active .fab-menu-item:nth-child(1) { transition-delay: 0.05s; }
+.fab-menu-vertical.active .fab-menu-item:nth-child(2) { transition-delay: 0.10s; }
+.fab-menu-vertical.active .fab-menu-item:nth-child(3) { transition-delay: 0.15s; }
+
+.fab-menu-item:hover { border-color: var(--neon-gold); color: var(--neon-gold); background: rgba(197,168,128,0.1); }
+.fab-menu-item.btn-danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.1); }
+
+/* ==========================================
+   PERBAIKAN MAPS LEAFLET & RECORDING
+   ========================================== */
+.leaflet-container { 
+    z-index: 1 !important; border-radius: 8px; border: 1px solid var(--border-cyber); filter: none !important;
+}
+
+@keyframes pulseRecord {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.recording-active { color: var(--danger) !important; animation: pulseRecord 1.5s infinite; border-radius: 50%; }
+
+/* ==========================================
+   EXECUTIVE DASHBOARD & MATRIX BUTTONS
+   ========================================== */
+.hologram-card {
+    background: linear-gradient(145deg, rgba(15,23,42,0.9) 0%, rgba(3,7,18,0.95) 100%);
+    border: 1px solid var(--border-active);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.matrix-btn {
+    background: var(--bg-panel-solid); border: 1px solid var(--border-cyber);
+    border-radius: 16px; padding: 16px 12px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; overflow: hidden;
+}
+.matrix-btn::before {
+    content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); pointer-events: none;
+}
+.matrix-btn:hover { border-color: var(--neon-gold); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 0 15px var(--neon-gold-glow); }
+.matrix-icon {
+    width: 44px; height: 44px; rounded: 50%; border-radius: 50%; background: var(--bg-base);
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    margin-bottom: 10px; transition: all 0.3s; border: 1px solid var(--border-cyber);
+}
+.matrix-title { font-family: 'Space Grotesk', monospace; font-size: 0.65rem; font-weight: 700; color: var(--text-main); letter-spacing: 1px; margin-bottom: 4px; }
+.matrix-desc { font-family: 'Outfit', sans-serif; font-size: 0.55rem; color: var(--text-muted); line-height: 1.2; }
+
+/* ==========================================
+   SMART CHAT INTERFACE & DRAWER MECHANISM
+   ========================================== */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+.media-drawer {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0; visibility: hidden;
+    transform: translateY(20px);
+}
+.media-drawer.drawer-open {
+    opacity: 1; visibility: visible;
+    transform: translateY(0);
+}
+.drawer-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    cursor: pointer;
+}
+.drawer-icon {
+    width: 50px; height: 50px; border-radius: 16px; border: 1px solid var(--border-cyber);
+    display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+    transition: all 0.3s;
+}
+.drawer-btn span { font-family: 'Space Grotesk', monospace; font-size: 0.6rem; color: var(--text-main); font-weight: 600; }
+
+
+
+/* ==========================================
+   HUD DIAGNOSTIC TELEMETRY (Radio & VU Meter)
+   ========================================== */
+   
+/* Gelombang Radio Jaringan */
+.radio-wave-container { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 12px; }
+.wave-bar { width: 3px; background: var(--text-muted); border-radius: 1px; animation: waveSignal 1s infinite alternate ease-in-out; opacity: 0.5; }
+.wave-bar:nth-child(1) { height: 40%; animation-delay: 0.0s; }
+.wave-bar:nth-child(2) { height: 60%; animation-delay: 0.2s; }
+.wave-bar:nth-child(3) { height: 100%; animation-delay: 0.4s; }
+.wave-bar:nth-child(4) { height: 80%; animation-delay: 0.6s; }
+
+/* VU Meter Ping Latensi */
+.vu-meter { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 12px; }
+.vu-segment { width: 6px; height: 10px; background: var(--bg-base); border: 1px solid var(--border-cyber); border-radius: 1px; transition: all 0.3s; }
+
+/* Status Aktif HUD */
+.hud-active .wave-bar { background: var(--success); box-shadow: 0 0 5px var(--success); opacity: 1; }
+.vu-segment.safe { background: var(--success); border-color: var(--success); box-shadow: 0 0 5px var(--success); }
+.vu-segment.warn { background: #eab308; border-color: #eab308; box-shadow: 0 0 5px #eab308; }
+.vu-segment.danger { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 5px var(--danger); }
+
+@keyframes waveSignal { 0% { transform: scaleY(0.5); } 100% { transform: scaleY(1); } }
+
+/* ==========================================
+   SECURE LIGHTBOX (Anti-Download & Anti-Hold)
+   ========================================== */
+.secure-shield {
+    /* Mencegah interaksi tahan (long-press) di iOS dan Android */
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    pointer-events: auto; /* Mencegah klik tembus ke gambar asli */
+}
+
+/* ==========================================
+   HUD DIAGNOSTIC TELEMETRY (Radio & VU Meter)
+   ========================================== */
+   
+/* Gelombang Radio Jaringan */
+.radio-wave-container { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 12px; }
+.wave-bar { width: 3px; background: var(--text-muted); border-radius: 1px; animation: waveSignal 1s infinite alternate ease-in-out; opacity: 0.5; }
+.wave-bar:nth-child(1) { height: 40%; animation-delay: 0.0s; }
+.wave-bar:nth-child(2) { height: 60%; animation-delay: 0.2s; }
+.wave-bar:nth-child(3) { height: 100%; animation-delay: 0.4s; }
+.wave-bar:nth-child(4) { height: 80%; animation-delay: 0.6s; }
+
+/* VU Meter Ping Latensi */
+.vu-meter { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 12px; }
+.vu-segment { width: 6px; height: 10px; background: var(--bg-base); border: 1px solid var(--border-cyber); border-radius: 1px; transition: all 0.3s; }
+
+/* Status Aktif HUD */
+.hud-active .wave-bar { background: var(--success); box-shadow: 0 0 5px var(--success); opacity: 1; }
+.vu-segment.safe { background: var(--success); border-color: var(--success); box-shadow: 0 0 5px var(--success); }
+.vu-segment.warn { background: #eab308; border-color: #eab308; box-shadow: 0 0 5px #eab308; }
+.vu-segment.danger { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 5px var(--danger); }
+
+@keyframes waveSignal { 0% { transform: scaleY(0.5); } 100% { transform: scaleY(1); } }
+
+/* ==========================================
+   SECURE LIGHTBOX & SYSTEM MODAL (Pop-Up)
+   ========================================== */
+.secure-shield {
+    /* Perisai anti interaksi tekan/tahan di Mobile (Cegah Download) */
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    pointer-events: auto; /* Mencegah klik tembus ke gambar di bawahnya */
+}
+
+/* Mengamankan gulir vertikal di chat dari bentrokan Swipe Laci Menu */
+.overscroll-contain { overscroll-behavior: contain; }
